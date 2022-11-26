@@ -5,54 +5,53 @@ const fs = require("fs").promises;
 const contactsPath = path.resolve('./bd', 'contacts.json')
 
 async function readContacts() {
-    const contacts = await fs.readFile(contactsPath)
-        .then(data => {
-            return JSON.parse(data.toString())
-        })
-        .catch(err => console.log(err.message))
+    try {
+        const res = await fs.readFile(contactsPath)
+        const stringedContacts = res.toString()
+        return JSON.parse(stringedContacts)
+    } catch (err) {
+        console.log(err.message)}
+    }
 
-    return contacts
-}
+    async function listContacts() {
+        const contacts = await readContacts()
 
-async function listContacts() {
-    const contacts = await readContacts()
+        const contactsList = contacts.map(contact => contact.name)
+        console.table(contactsList)
+        return contactsList
+    }
 
-    const contactsList = contacts.map(contact => contact.name)
-    console.table(contactsList)
-    return contactsList
-}
+    async function getContactById(contactId) {
+        const contacts = await readContacts()
 
-async function getContactById(contactId) {
-    const contacts = await readContacts()
+        const targetContact = contacts.find(contact => contact.id === contactId)
+        console.dir(targetContact)
+        return targetContact
+    }
 
-    const targetContact = contacts.find(contact => contact.id === contactId)
-    console.dir(targetContact)
-    return targetContact
-}
+    async function addContact(name, email, phone) {
+        const contacts = await readContacts()
 
-async function addContact(name, email, phone) {
-    const contacts = await readContacts()
+        const newId = String(Math.round((Math.random() * 100) * (Math.random() * 100)))
+        const newContact = { id: newId, name, email, phone }
+        contacts.push(newContact)
 
-    const newId = String(Math.round((Math.random() * 100) * (Math.random() * 100)))
-    const newContact = { id: newId, name, email, phone }
-    contacts.push(newContact)
+        fs.writeFile(contactsPath, JSON.stringify(contacts))
+    }
 
-    fs.writeFile(contactsPath, JSON.stringify(contacts))
-}
+    async function removeContact(contactId) {
+        const contacts = await readContacts()
 
-async function removeContact(contactId) {
-    const contacts = await readContacts()
+        const contactIndex = contacts.findIndex(contact => contact.id === contactId)
+        contacts.splice(contactIndex, 1)
 
-    const contactIndex = contacts.findIndex(contact => contact.id === contactId)
-    contacts.splice(contactIndex, 1)
-
-    fs.writeFile(contactsPath, JSON.stringify(contacts))
-}
+        fs.writeFile(contactsPath, JSON.stringify(contacts))
+    }
 
 
-module.exports = {
-    listContacts,
-    getContactById,
-    removeContact,
-    addContact
-}
+    module.exports = {
+        listContacts,
+        getContactById,
+        removeContact,
+        addContact
+    }

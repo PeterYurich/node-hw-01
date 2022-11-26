@@ -2,8 +2,9 @@ const path = require("path");
 const fs = require("fs").promises;
 
 
+const contactsPath = path.resolve('./bd', 'contacts.json')
+
 async function readContacts() {
-    const contactsPath = path.resolve('./bd', 'contacts.json')
     const contacts = await fs.readFile(contactsPath)
         .then(data => {
             return JSON.parse(data.toString())
